@@ -39,8 +39,8 @@
             forecastDiv.innerHTML = '';
 
                 // After (explicitly point to localhost:8080)
-                fetch(`http://localhost:8080/api/weather/forecast?city=${encodeURIComponent(city)}&offline=${offline}`)
-<!--            fetch(`/api/weather/forecast?city=${encodeURIComponent(city)}&offline=${offline}`)-->
+<!--                fetch(`http://localhost:8080/api/weather/forecast?city=${encodeURIComponent(city)}&offline=${offline}`)-->
+            fetch(`/api/weather/forecast?city=${encodeURIComponent(city)}&offline=${offline}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(response.statusText);
