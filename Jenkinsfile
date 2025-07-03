@@ -30,11 +30,10 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Docker Build') {
             steps {
-                sh 'docker --version' // Ensure Docker is available
                 script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                    docker.build("weather-prediction-service:${env.BUILD_ID}")
                 }
             }
         }
