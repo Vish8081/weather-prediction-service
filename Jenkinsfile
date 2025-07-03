@@ -33,7 +33,12 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                    try {
+                        sh 'docker --version'
+                        docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                    } catch (Exception e) {
+                        error("Docker is not available: ${e.message}")
+                    }
                 }
             }
         }
