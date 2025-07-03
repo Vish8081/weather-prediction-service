@@ -52,7 +52,6 @@ pipeline {
     post {
         always {
             cleanWs()
-            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
         }
     }
 }
