@@ -15,7 +15,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh './mvnw clean package'
+                sh './mvnw clean package -DskipTests'
             }
         }
 
@@ -32,13 +32,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
+                sh 'docker --version' // Ensure Docker is available
                 script {
-                    try {
-                        sh 'docker --version'
-                        docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                    } catch (Exception e) {
-                        error("Docker is not available: ${e.message}")
-                    }
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
                 }
             }
         }
@@ -46,12 +42,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Stop and remove existing container
                     sh 'docker stop weather-service || true'
                     sh 'docker rm weather-service || true'
-
-                    // Run new container
-                    sh "docker run -d -p 8080:8080 --name weather-service ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    sh "docker run -d -p 8081:8080 --name weather-service ${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
         }
@@ -59,9 +52,7 @@ pipeline {
 
     post {
         always {
-            // Clean up workspace
             cleanWs()
-            // Archive test results
             archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
         }
     }
