@@ -81,9 +81,14 @@ public class DailyForecast {
         this.recommendations = new ArrayList<>();
     }
 
-    public void updateTemperatures(double currentTemp) {
-        this.highTemp = Math.max(highTemp, currentTemp);
-        this.lowTemp = Math.min(lowTemp, currentTemp);
+    public void updateTemperatures(double slotMin, double slotMax) {
+        this.lowTemp  = Math.min(this.lowTemp,  slotMin);
+        this.highTemp = Math.max(this.highTemp, slotMax);
+    }
+
+    /* keep the old single‑value overload in case you still call it elsewhere */
+    public void updateTemperatures(double temp) {
+        updateTemperatures(temp, temp);
     }
 
     public void updateWindSpeed(double windSpeed) {

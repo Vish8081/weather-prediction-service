@@ -35,7 +35,7 @@ public class WeatherService {
         }
         try {
             System.out.println("City Parameter: " + city);
-            String url = String.format("%s?q=%s&appid=%s&cnt=10&units=metric", WEATHER_API_URL, city, API_KEY);
+            String url = String.format("%s?q=%s&appid=%s&cnt=24&units=metric", WEATHER_API_URL, city, API_KEY);
             String response = restTemplate.getForObject(url, String.class);
 
             // Check if the response is valid
@@ -83,18 +83,17 @@ public class WeatherService {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
 
-            if (!forecasts.containsKey(date)) {
-                forecasts.put(date, new DailyForecast(date));
-            }
+            DailyForecast daily = forecasts.computeIfAbsent(date, DailyForecast::new);
 
-            DailyForecast dailyForecast = forecasts.get(date);
-            double temp = item.path("main").path("temp").asDouble();
-            double windSpeed = item.path("wind").path("speed").asDouble();
-            String weatherMain = item.path("weather").get(0).path("main").asText();
+            double slotMin = item.path("main").path("temp_min").asDouble();
+            double slotMax = item.path("main").path("temp_max").asDouble();
+            daily.updateTemperatures(slotMin, slotMax);          // <<< uses extremes
 
-            dailyForecast.updateTemperatures(temp);
-            dailyForecast.updateWindSpeed(windSpeed);
-            dailyForecast.updateWeatherConditions(weatherMain);
+            double wind = item.path("wind").path("speed").asDouble();
+            daily.updateWindSpeed(wind);
+
+            String cond = item.path("weather").get(0).path("main").asText();
+            daily.updateWeatherConditions(cond);
         }
 
         // Get next 3 days forecasts
