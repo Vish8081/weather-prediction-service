@@ -33,14 +33,42 @@ public class WeatherService {
         if (offline) {
             return getOfflineForecast(city);
         }
-
         try {
+            System.out.println("City Parameter: " + city);
             String url = String.format("%s?q=%s&appid=%s&cnt=10&units=metric", WEATHER_API_URL, city, API_KEY);
             String response = restTemplate.getForObject(url, String.class);
+
+            // Check if the response is valid
+            if (response == null || response.contains("\"cod\":\"404\"")) {
+                WeatherForecastResponse offlineResponse = getOfflineForecast(city);
+                setErrorForForecasts(offlineResponse.getForecasts(), "City not found: " + city);
+                return offlineResponse;
+            }
+
+            System.out.println("City Parameter: " + city);
+            System.out.println("response" + response);
+
             return parseApiResponse(response);
         } catch (Exception e) {
-            // Fallback to offline mode if API fails
-            return getOfflineForecast(city);
+            // Log the error
+            System.err.println("Error fetching weather data: " + e.getMessage());
+
+            // Create offline forecast with error
+            WeatherForecastResponse offlineResponse = getOfflineForecast(city);
+
+            // Set error message if city not found
+            if (e.getMessage() != null && e.getMessage().contains("city not found")) {
+                setErrorForForecasts(offlineResponse.getForecasts(), "City not found: " + city);
+            }
+            return offlineResponse;
+        }
+    }
+
+    private void setErrorForForecasts(List<DailyForecast> forecasts, String errorMessage) {
+        if (forecasts != null) {
+            for (DailyForecast forecast : forecasts) {
+                forecast.setError(errorMessage);
+            }
         }
     }
 

@@ -16,6 +16,16 @@ public class DailyForecast {
     private String weatherCondition;
     private List<String> recommendations;
 
+    private String error;
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
     public LocalDate getDate() {
         return date;
     }
